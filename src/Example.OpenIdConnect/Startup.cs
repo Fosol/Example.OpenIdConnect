@@ -38,7 +38,15 @@ namespace Example.OpenIdConnect
                 });
 
             // Add Identity services to the services container.
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Cookies.ApplicationCookie.AutomaticAuthenticate = true;
+                options.Cookies.ApplicationCookie.AutomaticChallenge = true;
+                options.Cookies.ApplicationCookie.AuthenticationScheme = "ServerCookie";
+                options.Cookies.ApplicationCookie.CookieName = CookieAuthenticationDefaults.CookiePrefix + "ServerCookie";
+                options.Cookies.ApplicationCookie.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                options.Cookies.ApplicationCookie.LoginPath = new PathString("/signin");
+            })
                 .AddEntityFrameworkStores<MembershipContext>()
                 .AddDefaultTokenProviders();
 
@@ -61,14 +69,9 @@ namespace Example.OpenIdConnect
             var factory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
             factory.AddConsole();
 
-            app.UseCookieAuthentication(options => {
-                options.AutomaticAuthenticate = true;
-                options.AutomaticChallenge = true;
-                options.AuthenticationScheme = "ServerCookie";
-                options.CookieName = CookieAuthenticationDefaults.CookiePrefix + "ServerCookie";
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-                options.LoginPath = new PathString("/signin");
-            });
+            app.UseStaticFiles();
+
+            app.UseIdentity();
 
             app.UseOpenIdConnectServer(options => {
                 options.Provider = new AuthorizationProvider();
@@ -82,10 +85,6 @@ namespace Example.OpenIdConnect
                 // RSA keys but you can also use your own certificate:
                 // options.SigningCredentials.AddCertificate(certificate);
             });
-
-            app.UseStaticFiles();
-
-            app.UseIdentity();
 
             app.UseMvc();
 
