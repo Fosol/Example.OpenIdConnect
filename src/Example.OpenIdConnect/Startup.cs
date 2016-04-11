@@ -69,10 +69,6 @@ namespace Example.OpenIdConnect
             var factory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
             factory.AddConsole();
 
-            app.UseStaticFiles();
-
-            app.UseIdentity();
-
             app.UseOpenIdConnectServer(options => {
                 options.Provider = new AuthorizationProvider();
 
@@ -85,6 +81,10 @@ namespace Example.OpenIdConnect
                 // RSA keys but you can also use your own certificate:
                 // options.SigningCredentials.AddCertificate(certificate);
             });
+
+            app.UseStaticFiles();
+
+            app.UseIdentity();
 
             app.UseMvc();
 
